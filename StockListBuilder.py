@@ -1,12 +1,17 @@
+# -*- coding: UTF-8 -*-
+
 from Crawler import *
 from Crawler import Const
 import os
 import shutil
+import sys
 import logging
 from datetime import datetime, timedelta
 
 class StockListBuilder():
     def __init__(self):
+        reload(sys)
+        sys.setdefaultencoding('utf-8')
         self._file_writer = FileWriter()
         self._crawler = StockListCrawler()
 

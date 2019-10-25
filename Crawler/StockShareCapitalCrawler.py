@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+
 import pandas as pd
 import requests
 from Crawler import *
@@ -20,10 +22,8 @@ class StockShareCapitalCrawler():
         response = requests.get(StockShareCapitalCrawler.SHARE_CAPITAL_URL, headers=headers)
 
         df = pd.read_html(response.text)[0]
-        df = df[['代號', '公司', '資本額(億)']]
-        df.to_csv('../data/ShareCapital.csv', index=False)
-
-
+        df = df[[u'代號', u'公司', u'資本額(億)']]
+        df.to_csv('../data/ShareCapital.csv', index=False, encoding="utf-8")
 
 
 

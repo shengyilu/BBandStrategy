@@ -52,9 +52,11 @@ class DayPriceHistoryBuilder():
 
 
     def _save_data(self, stock_data_dict):
-        print('_save_data')
+        print(stock_data_dict)
         stock_list = self._stock_list_provider.get_stock_id_list()
         for stock_id in stock_list:
+
+
             if stock_id in stock_data_dict:
                 row = stock_data_dict[stock_id]
                 file_path = '{}/{}-raw.csv'.format(Const.STOCK_HISTORY_FOLDER_PATH, stock_id)

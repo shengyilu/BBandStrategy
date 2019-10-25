@@ -7,8 +7,8 @@ class StockListCrawler():
 
     TSE_STOCK_LIST = 'https://tw.stock.yahoo.com/h/kimosel.php'
     TSE_STOCK_CATEGORY = 'https://tw.stock.yahoo.com/h/kimosel.php?tse={CAT_INDEX}&cat=%C2d%A5b%BE%C9&form=menu&form_id=stock_id&form_name=stock_name&domain=0'
-    CATEGORY_TSE_INDEX = 1;
-    CATEGORY_OTC_INDEX = 2;
+    CATEGORY_TSE_INDEX = 1
+    CATEGORY_OTC_INDEX = 2
     USER_AGENT = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.118 Safari/537.36'
     REQUEST_HEADER = { 'User-Agent': USER_AGENT }
 
@@ -63,8 +63,10 @@ class StockListCrawler():
         return stock_list
 
 #
-# def main():
-#     crawler = StockListCrawler()
-#
-# if __name__ == '__main__':
-#     main()
+def main():
+    crawler = StockListCrawler()
+    crawler.fetch_stock_list()
+
+
+if __name__ == '__main__':
+    main()

@@ -120,7 +120,7 @@ def export_html(df_select, fileName):
     df_share_capital = getCapitalInfo(df_select.index.values)
     df = pd.merge(df_share_capital, df_select, left_index=True, right_index=True)
     pd.set_option('display.max_colwidth', -1)
-    df.to_html('{0}/{1}_{2}.html'.format(Const.STOCK_DATA_FOLDER_NAME, fileName, datetime.today().strftime("%Y-%m-%d")), render_links=True)
+    df.to_html('{0}/{1}_{2}.html'.format(Const.STOCK_DATA_FOLDER_NAME, fileName, datetime.today().strftime("%Y-%m-%d")))
 
 
 def main():

@@ -1,10 +1,16 @@
+import sys
 import csv
 from Crawler import Const
 import os
+import io
+import sys
 
 class StockListProvider():
 
     def __init__(self):
+        print(sys.version_info[0])
+        reload(sys)
+        sys.setdefaultencoding('utf-8')
         self._stock_list_csv_path = '{}/{}'.format(Const.STOCK_DATA_FOLDER_NAME, Const.STOCK_LIST_FILE_NAME)
         self._stock_dict = {}
         self._init_dict()
@@ -13,7 +19,7 @@ class StockListProvider():
         if not os.path.isfile(self._stock_list_csv_path):
             return None
 
-        file = open(self._stock_list_csv_path, 'r')
+        file = io.open(self._stock_list_csv_path, 'r', encoding='utf-8')
         csv_cursor = csv.reader(file)
         for row in csv_cursor:
             self._stock_dict[row[0]] = row[1]

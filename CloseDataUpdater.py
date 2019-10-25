@@ -57,16 +57,23 @@ class CloseDataUpdater():
         return stock_history_list
 
     def _save_data(self, stock_data_dict):
+        print("_save_data")
         stock_list = self._stock_list_provider.get_stock_id_list()
         for stock_id in stock_list:
-            print(stock_id)
+
+            #print(stock_id)
             if stock_id in stock_data_dict:
+                print("_save_data{0}".format(stock_id))
                 stock_id_price_path = "{0}/{1}-raw.csv".format(Const.STOCK_HISTORY_FOLDER_PATH, stock_id)
-                df = pd.read_csv(stock_id_price_path, header=None)
-                row = pd.Series(stock_data_dict[stock_id])
-                df = df.append(row, ignore_index=True)
-                df = df.tail(110)
-                df.to_csv(stock_id_price_path, index=False, header=False)
+                try:
+                    df = pd.read_csv(stock_id_price_path, header=None)
+                    row = pd.Series(stock_data_dict[stock_id])
+                    df = df.append(row, ignore_index=True)
+                    df = df.tail(110)
+                    df.to_csv(stock_id_price_path, index=False, header=False)
+                except IOError as err:
+                    print("No data of {0}-raw".format(stock_id))
+
 
 
    # ==================================================================================================================

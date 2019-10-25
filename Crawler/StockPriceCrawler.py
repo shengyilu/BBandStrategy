@@ -1,3 +1,4 @@
+#coding=utf-8
 import time
 import logging
 from datetime import datetime, timedelta
@@ -68,10 +69,10 @@ class StockPriceCrawler():
 
         date_str_ac = '{0}-{1:02d}-{2:02d}'.format(date_split[0], date_split[1], date_split[2])
 
-        if not 'data5' in content:
+        if not 'data9' in content:
             return
         else:
-            for data in content['data5']:
+            for data in content['data9']:
                 stock_id = data[0]
                 if self._stock_list_provider.stock_id_exists(stock_id):
                     row = self._data_format([

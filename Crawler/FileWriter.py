@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+
 import os
 import csv
 from Crawler import Const
