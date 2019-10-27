@@ -23,7 +23,7 @@ class StockShareCapitalCrawler():
 
         df = pd.read_html(response.text)[0]
         df = df[[u'代號', u'公司', u'資本額(億)']]
-        df.to_csv('../data/ShareCapital.csv', index=False, encoding="utf-8")
+        df.to_csv('data/ShareCapital.csv', index=False, encoding="utf-8")
 
 
 
