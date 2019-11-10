@@ -61,7 +61,6 @@ class StockPriceCrawler():
 
         # Get json data
         page = requests.get(url, params=query_params)
-        print(page.url)
         if not page.ok:
             return
 

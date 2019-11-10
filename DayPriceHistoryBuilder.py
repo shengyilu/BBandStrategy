@@ -44,7 +44,6 @@ class DayPriceHistoryBuilder():
         days_before = days
         while days_before >= 0:
             query_date = datetime.today() - timedelta(days=days_before)
-            print(query_date)
             time.sleep(4)
             stock_day_data_dict = self._crawler.fetch_data(query_date)
             self._save_data(stock_day_data_dict)
@@ -52,7 +51,6 @@ class DayPriceHistoryBuilder():
 
 
     def _save_data(self, stock_data_dict):
-        print(stock_data_dict)
         stock_list = self._stock_list_provider.get_stock_id_list()
         for stock_id in stock_list:
 

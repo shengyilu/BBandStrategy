@@ -57,13 +57,9 @@ class CloseDataUpdater():
         return stock_history_list
 
     def _save_data(self, stock_data_dict):
-        print("_save_data")
         stock_list = self._stock_list_provider.get_stock_id_list()
         for stock_id in stock_list:
-
-            #print(stock_id)
             if stock_id in stock_data_dict:
-                print("_save_data{0}".format(stock_id))
                 stock_id_price_path = "{0}/{1}-raw.csv".format(Const.STOCK_HISTORY_FOLDER_PATH, stock_id)
                 try:
                     df = pd.read_csv(stock_id_price_path, header=None)

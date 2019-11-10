@@ -199,9 +199,7 @@ def findInLowBBand():
             continue
 
         latestCloseData = df.iloc[-1, :].values
-        #print("latestCloseData = {0}".format(latestCloseData))
         latestCloseData2 = df.iloc[-2, :].values
-        #print("latestCloseData2 = {0}".format(latestCloseData2))
         volume = df.iloc[:, 2].astype('float').values
         closePrices = df.iloc[:, 6].astype('float').values
 
@@ -216,11 +214,9 @@ def findInLowBBand():
         close_sma_20 = np.round(talib.SMA(closePrices, timeperiod=20), 2)
 
         if float(latestCloseData[6]) < float(latestCloseData2[4]):
-            #print('{} < {}'.format(close_sma_20[-1], close_sma_20[-2]))
             continue
 
         if float(latestCloseData[6]) < float(latestCloseData[3]):
-            # print('{} < {}'.format(close_sma_20[-1], close_sma_20[-2]))
             continue
 
         upperband, middleband, lowerband = talib.BBANDS(closePrices, timeperiod=20, nbdevup=2.1, nbdevdn=2.1, matype=0)
@@ -262,10 +258,6 @@ def findBelowLowBBand():
             continue
 
         close_sma_20 = np.round(talib.SMA(closePrices, timeperiod=20), 2)
-
-        # if close_sma_20[-1] < close_sma_20[-2]:
-        #     # print('{} < {}'.format(close_sma_20[-1], close_sma_20[-2]))
-        #     continue
 
         upperband, middleband, lowerband = talib.BBANDS(closePrices, timeperiod=20, nbdevup=2.1, nbdevdn=2.1, matype=0)
         bUpper = np.round(upperband[-1], 2)

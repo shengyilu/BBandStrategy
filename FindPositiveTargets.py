@@ -104,11 +104,11 @@ def export_html(df_select, fileName):
     df_share_capital = getCapitalInfo(df_select.index.values)
     df = pd.merge(df_share_capital, df_select, left_index=True, right_index=True)
     pd.set_option('display.max_colwidth', -1)
-    df.to_html('{0}/{1}_{2}.html'.format(folder, fileName, datetime.today().strftime("%Y-%m-%d")))
+    df.to_html('{0}/{1}_{2}.html'.format(folder, fileName, datetime.today().strftime("%Y-%m-%d")), render_links=True)
 
 
 def createFolderIfNeed(name):
-    folder = '{0}/{1}'.format(Const.STOCK_DATA_FOLDER_NAME, name)
+    folder = '{0}/{1}'.format('selection', name)
     if not os.path.isdir(folder):
         os.mkdir(folder)
     return folder
@@ -312,11 +312,53 @@ def _findInLowBBandAndGoUP():
     df = pd.DataFrame(selectedStocks, columns=['股號', '成交量', '最後收盤價', '布林線圖', '週線圖'])
     export_html(df, 'BLow')
 
+
+def _findTurningPointInLowBBand():
+    
+    stock_list_provider = StockListProvider()
+    stock_id_list = stock_list_provider.get_stock_id_list()
+    selectedStocks = []
+
+    for stock_id in stock_id_list:
+        if stock_id in Const.STOCK_IGNORE_LIST:
+            continue
+        try:
+            df = _read_raw_prices(stock_id)
+        except IOError as err:
+            continue
+
+        latestCloseData = df.iloc[-1, :].values
+        previousData = df.iloc[-2, :].values
+        closePrices = df.iloc[:, 6].astype('float').values
+
+        close_sma_100 = np.round(talib.SMA(closePrices, timeperiod=100), 2)
+
+        # 水餃股，張數小於1000不考慮
+        if float(latestCloseData[6]) < 10 or float(latestCloseData[2] / 1000) < 1000:
+            continue
+
+        upperband, middleband, lowerband = talib.BBANDS(closePrices, timeperiod=20, nbdevup=2.1, nbdevdn=2.1, matype=0)
+        bMid = np.round(middleband[-1], 2)
+        bLow = np.round(lowerband[-1], 2)
+
+        if float(previousData[5]) < bLow and float(latestCloseData[6]) > bLow:
+            target = [latestCloseData[0],
+                      round(float(latestCloseData[2]) / 1000),
+                      latestCloseData[6],
+                      "https://histock.tw/stock/tchart.aspx?no={}&m=b".format(latestCloseData[0]),
+                      "http://jsjustweb.jihsun.com.tw/Z/ZC/ZCW/ZCW_{}_W.djhtm".format(latestCloseData[0])]
+            selectedStocks.append(target)
+
+    pd.set_option('display.max_colwidth', -1)
+    df = pd.DataFrame(selectedStocks, columns=['股號', '成交量', '最後收盤價', '布林線圖', '週線圖'])
+    export_html(df, '在下軌道以下反轉')
+
 def main():
     _findBBandPolicy()
     _findAbove20W()
     _findCrossDay20FromBBandLow()
     _findInLowBBandAndGoUP()
+    _findTurningPointInLowBBand()
 
 
 if __name__ == '__main__':
