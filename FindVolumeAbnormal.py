@@ -6,6 +6,48 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 
+def _findPositiveOrder():
+    stock_list_provider = StockListProvider()
+    stock_id_list = stock_list_provider.get_stock_id_list()
+    selectedStocks = []
+    selectedStocks_published = []
+    for stock_id in stock_id_list:
+        if stock_id in Const.STOCK_IGNORE_LIST:
+            continue
+        try:
+            latestCloseData, closePrices, volumes = _read_raw_price_by_id(stock_id)
+        except IOError as err:
+            continue
+
+        if float(latestCloseData[2])/1000 < 1000:
+            continue
+        
+        close_sma_100 = np.round(talib.SMA(closePrices, timeperiod=100), 2)
+        close_sma_20 = np.round(talib.SMA(closePrices, timeperiod=20), 2)
+        close_sma_5 = np.round(talib.SMA(closePrices, timeperiod=5), 2)
+
+        preCloseAvg100 = close_sma_100[-2]
+        preCloseAvg20 = close_sma_20[-2]
+        preCloseAvg5 = close_sma_5[-2]       
+
+        if preCloseAvg100 > preCloseAvg20:
+            continue
+
+        if preCloseAvg20 > preCloseAvg5:
+            continue
+
+
+        target = [latestCloseData[0],
+                  round(float(latestCloseData[2])/1000),
+                  latestCloseData[6],
+                  "https://histock.tw/stock/tchart.aspx?no={}&m=b".format(latestCloseData[0]),
+                  "http://jsjustweb.jihsun.com.tw/Z/ZC/ZCW/ZCW_{}_W.djhtm".format(latestCloseData[0])]
+        
+        selectedStocks.append(target)
+
+    df_selected = pd.DataFrame(selectedStocks, columns=['股號', '成交量', '最後收盤價', '線圖', '週線圖'])
+    export_html(df_selected, '多頭排列')
+
 def findVolumeSpike():
 
     stock_list_provider = StockListProvider()
@@ -19,25 +61,24 @@ def findVolumeSpike():
         except FileNotFoundError as err:
             continue
 
-        if float(latestCloseData[2])/1000 < 10000:
+        if float(latestCloseData[2])/1000 < 1000:
             continue
 
         close_sma_100 = np.round(talib.SMA(closePrices, timeperiod=100), 2)
-        # if float(latestCloseData[6]) < close_sma_100[-1]:
-        #     continue
+        if float(latestCloseData[6]) < close_sma_100[-1]:
+            continue
 
         volume_sma_5 = np.round(talib.SMA(volumes, timeperiod=5))
         preVolumeAvg5 = volume_sma_5[-2]
         if float(latestCloseData[2]) > 3 * preVolumeAvg5:
-            sma100slope = (close_sma_100[-1] - close_sma_100[-2])
 
             target = [latestCloseData[0], round(float(latestCloseData[2]) / 1000), round(preVolumeAvg5 / 1000),
-                      latestCloseData[6], round(float(sma100slope), 2), "https://histock.tw/stock/tchart.aspx?no={}&m=b".format(latestCloseData[0]),
+                      latestCloseData[6], "http://jsjustweb.jihsun.com.tw/Z/ZC/ZCW/ZCW_{}_d.djhtm".format(latestCloseData[0]),
                       "http://jsjustweb.jihsun.com.tw/Z/ZC/ZCW/ZCW_{}_W.djhtm".format(latestCloseData[0])]
             selectedStocks.append(target)
 
     pd.set_option('display.max_colwidth', -1)
-    df = pd.DataFrame(selectedStocks, columns=['股號', '成交量', '前5日均量', '最後收盤價', '月線斜率', '布林線圖', '週線圖'])
+    df = pd.DataFrame(selectedStocks, columns=['股號', '成交量', '前5日均量', '最後收盤價', '日線圖', '週線圖'])
     #df.to_html('{0}/VolumeSpike_{1}.html'.format(Const.STOCK_DATA_FOLDER_NAME, datetime.today().strftime("%Y-%m-%d")),render_links=True)
     export_html(df, 'VolumeSpike')
 
@@ -90,6 +131,7 @@ def export_html(df_select, fileName):
 
 def main():
     findVolumeSpike()
+    _findPositiveOrder()
 
 
 if __name__ == '__main__':

@@ -105,7 +105,7 @@ def export_html(df_select, fileName):
     df = pd.merge(df_share_capital, df_select, left_index=True, right_index=True)
     pd.set_option('display.max_colwidth', -1)
     df.to_html('{0}/{1}_{2}.html'.format(Const.STOCK_DATA_FOLDER_NAME, fileName, datetime.today().strftime("%Y-%m-%d")))
-    df.to_excel('{0}/{1}_{2}.xlsx'.format(Const.STOCK_DATA_FOLDER_NAME, fileName, datetime.today().strftime("%Y-%m-%d")))
+    ##df.to_excel('{0}/{1}_{2}.xlsx'.format(Const.STOCK_DATA_FOLDER_NAME, fileName, datetime.today().strftime("%Y-%m-%d")))
 
 def _read_raw_price_by_id(stock_id):
     '''

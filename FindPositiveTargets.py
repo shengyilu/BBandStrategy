@@ -201,21 +201,22 @@ def _findAbove20W():
         volumes_sma_20 = np.round(talib.SMA(volumes, timeperiod=20), 2)
         volumeAvg20 = volumes_sma_20[-1]
 
-        if (volumeAvg20 / 1000) < 1000:
+        if (volumeAvg20 / 1000) < 5000:
             continue
 
         target = [latestCloseData[0],
                   round(float(latestCloseData[2]) / 1000),
                   round(volumeAvg20 / 1000),
                   round(float(latestCloseData[2]) / volumeAvg20, 2),
+                  round((float(latestCloseData[6]) - closeAvg100)/closeAvg100 * 100),
                   latestCloseData[6],
-                  "https://histock.tw/stock/tchart.aspx?no={}&m=b".format(latestCloseData[0]),
+                  "http://jsjustweb.jihsun.com.tw/Z/ZC/ZCW/ZCW_{}_D.djhtm".format(latestCloseData[0]),
                   "http://jsjustweb.jihsun.com.tw/Z/ZC/ZCW/ZCW_{}_W.djhtm".format(latestCloseData[0])]
 
 
 
         selectedStocks.append(target)
-        df_selected = pd.DataFrame(selectedStocks, columns=['股號', '成交量', '週均量', '量倍數', '最後收盤價', '線圖', '週線圖'])
+        df_selected = pd.DataFrame(selectedStocks, columns=['股號', '成交量', '週均量', '量倍數', '乖離率', '最後收盤價', '日線圖', '週線圖'])
         export_html(df_selected, '20週長線選股')
 
 def _findCrossDay20FromBBandLow():
@@ -260,6 +261,64 @@ def _findCrossDay20FromBBandLow():
     #df.to_html('{0}/findCrossDay20.html'.format(Const.STOCK_DATA_FOLDER_NAME, datetime.today().strftime("%Y-%m-%d")), render_links=True)
     export_html(df, '強勢回檔反彈股')
 
+def _findCrossDay5Half():
+    '''
+    日本股神的短線策略 "股價和5日均價交叉，實體紅k的一半以上在5日均線上
+    '''
+    stock_list_provider = StockListProvider()
+    stock_id_list = stock_list_provider.get_stock_id_list()
+    selectedStocks = []
+
+    for stock_id in stock_id_list:
+        if stock_id in Const.STOCK_IGNORE_LIST:
+            continue
+        try:
+            df = _read_raw_prices(stock_id)
+        except IOError as err:
+            continue
+
+        latestCloseData = df.iloc[-1, :].values
+        previousData = df.iloc[-2, :].values
+        closePrices = df.iloc[:, 6].astype('float').values
+
+        # 水餃股，張數小於1000不考慮
+        if float(latestCloseData[6]) < 10 or float(latestCloseData[2] / 1000) < 1000:
+            continue
+
+        close_sma_5 = np.round(talib.SMA(closePrices, timeperiod=5), 2)
+        close_sma_10 = np.round(talib.SMA(closePrices, timeperiod=10), 2)
+        close_sma_20 = np.round(talib.SMA(closePrices, timeperiod=20), 2)
+        close_sma_60 = np.round(talib.SMA(closePrices, timeperiod=60), 2)
+        close_sma_100 = np.round(talib.SMA(closePrices, timeperiod=100), 2)
+
+        #if close_sma_5[-1] > close_sma_10[-1] and close_sma_10[-1] > close_sma_20[-1] and close_sma_20[-1] > close_sma_60 [-1] and close_sma_60[-1] > close_sma_100[-1]:
+        
+        if float(latestCloseData[6]) < close_sma_100[-1]:
+            continue
+
+        if float(latestCloseData[6]) < close_sma_5[-1] or float(latestCloseData[3]) > close_sma_5[-1]:
+            continue
+
+        red_k_diff = float(latestCloseData[6]) - float(latestCloseData[3])
+        if red_k_diff == 0:
+            continue
+
+        red_k_above_sma_5 = float(latestCloseData[6]) - close_sma_5[-1]
+        if (red_k_above_sma_5 / red_k_diff) < 0.5:
+            continue
+
+        print("{0}, sma5={1}, open={2}, close={3}".format(latestCloseData[0], close_sma_5[-1], latestCloseData[3], latestCloseData[6]))
+            
+        target = [latestCloseData[0],
+                    round(float(latestCloseData[2]) / 1000),
+                    latestCloseData[6],
+                    "https://histock.tw/stock/tchart.aspx?no={}&m=b".format(latestCloseData[0]),
+                    "http://jsjustweb.jihsun.com.tw/Z/ZC/ZCW/ZCW_{}_W.djhtm".format(latestCloseData[0])]
+        selectedStocks.append(target)
+
+    pd.set_option('display.max_colwidth', -1)
+    df = pd.DataFrame(selectedStocks, columns=['股號', '成交量', '最後收盤價', '布林線圖', '週線圖'])
+    export_html(df, '紅在一半在5日線上')
 
 def _findInLowBBandAndGoUP():
     '''
@@ -359,6 +418,7 @@ def main():
     _findCrossDay20FromBBandLow()
     _findInLowBBandAndGoUP()
     _findTurningPointInLowBBand()
+    _findCrossDay5Half()
 
 
 if __name__ == '__main__':
